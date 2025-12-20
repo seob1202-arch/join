@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kornect - 업체 등록 및 수정</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f9fafb; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-shadow { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
+        .radio-option { transition: all 0.2s ease; border: 2px solid #e5e7eb; }
+        .radio-option:hover { border-color: #8b5cf6; transform: translateY(-2px); }
+        .radio-option input:checked + label { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-color: transparent; }
+        .radio-option input:checked + label svg { color: white; }
+        .modal-bg { background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #7c3aed; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="loadingOverlay" class="fixed inset-0 modal-bg z-50 hidden flex flex-col justify-center items-center">
+        <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center">
+            <div class="loader mb-4"></div>
+            <p class="text-gray-600 font-medium">데이터를 안전하게 저장 중입니다...</p>
+        </div>
+    </div>
+
+    <div id="warningModal" class="fixed inset-0 modal-bg z-40 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full card-shadow transform transition-all scale-100">
+            <div class="text-center">
+                <div class="bg-yellow-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">소유주 확인 필요</h3>
+                <p class="text-gray-500 mb-6 text-sm break-keep">본 업체의 소유주만 정보 수정 및 삭제 요청이 가능합니다. 계속 하시겠습니까?</p>
+                <div class="flex gap-3">
+                    <button onclick="closeModal(false)" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-300 transition">취소</button>
+                    <button onclick="closeModal(true)" class="flex-1 gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 transition shadow-lg">확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="successModal" class="fixed inset-0 modal-bg z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full card-shadow transform transition-all scale-100">
+            <div class="text-center">
+                <div class="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">접수 완료</h3>
+                <div class="text-gray-500 mb-6 text-sm break-keep space-y-1">
+                    <p id="successMessageText">성공적으로 처리되었습니다.</p>
+                    <p class="text-xs text-purple-600 font-medium animate-pulse">잠시 후 창이 자동으로 닫힙니다...</p>
+                </div>
+                <button onclick="forceCloseWindow()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-medium hover:bg-gray-200 transition">지금 닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="min-h-screen py-10 px-4">
+        <div class="max-w-xl mx-auto">
+            <div class="bg-white rounded-3xl card-shadow p-8 mb-6 text-center">
+                <img src="https://static.wixstatic.com/media/cd1160_4159e89efaa54c9dbc6eb61c35a0f107~mv2.png" alt="Kornect Logo" class="h-24 mx-auto mb-6 object-contain">
+                <p class="text-gray-500 text-sm leading-relaxed break-keep">
+                    해외 체류 중인 한인들의 비즈니스 홍보와 교류를 위한 무료 플랫폼입니다.
+                    <br><span class="text-purple-600 font-medium">현지 법령을 준수하는 비즈니스라면 누구나 환영합니다.</span>
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-3xl card-shadow p-6 mb-6">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 text-center">원하시는 서비스를 선택하세요</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="radio-option rounded-xl overflow-hidden cursor-pointer relative">
+                        <input type="radio" name="mainOption" id="optionNew" value="new" class="hidden peer" checked>
+                        <label for="optionNew" class="block p-6 cursor-pointer text-center h-full">
+                            <svg class="w-10 h-10 mx-auto mb-2 text-gray-400 peer-checked:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            <span class="font-semibold block">신규 업체 등록</span>
+                        </label>
+                    </div>
+                    <div class="radio-option rounded-xl overflow-hidden cursor-pointer relative">
+                        <input type="radio" name="mainOption" id="optionEdit" value="edit" class="hidden peer">
+                        <label for="optionEdit" onclick="handleEditClick(event)" class="block p-6 cursor-pointer text-center h-full">
+                            <svg class="w-10 h-10 mx-auto mb-2 text-gray-400 peer-checked:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            <span class="font-semibold block">정보 수정/삭제</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <form id="mainForm" class="bg-white rounded-3xl card-shadow p-8 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 gradient-bg"></div>
+                <div id="newRegistrationForm" class="space-y-6">
+                    <h3 class="text-xl font-bold text-gray-800 pb-2 border-b border-gray-100">📝 신규 등록 정보</h3>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-2">업체명 <span class="text-red-500">*</span></label><input type="text" name="businessName" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:bg-white transition outline-none" placeholder="상호명을 입력하세요"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-2">사업장 주소 <span class="text-red-500">*</span></label><input type="text" name="address" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:bg-white transition outline-none" placeholder="Google Maps 검색 가능한 주소"></div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-3">영업시간 <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                             <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex flex-col items-center justify-center relative shadow-sm">
+                                <span class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm tracking-wider">OPEN</span>
+                                <div class="flex items-center gap-1 mt-2">
+                                    <select name="openHour" class="appearance-none bg-transparent text-2xl font-bold text-gray-800 text-center outline-none focus:text-blue-600 transition cursor-pointer p-0 w-12"><option value="">10</option></select>
+                                    <span class="text-xl font-bold text-gray-400 pb-1">:</span>
+                                    <select name="openMinute" class="appearance-none bg-transparent text-2xl font-bold text-gray-800 text-center outline-none focus:text-blue-600 transition cursor-pointer p-0 w-12"><option value="">00</option></select>
+                                    <select name="openPeriod" class="appearance-none bg-white border border-blue-200 text-xs font-bold text-blue-600 rounded-md px-2 py-1 ml-1 outline-none shadow-sm"><option value="AM">AM</option><option value="PM">PM</option></select>
+                                </div>
+                             </div>
+                             <div class="bg-gray-50 border border-gray-200 p-4 rounded-2xl flex flex-col items-center justify-center relative shadow-sm">
+                                <span class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm tracking-wider">CLOSE</span>
+                                <div class="flex items-center gap-1 mt-2">
+                                    <select name="closeHour" class="appearance-none bg-transparent text-2xl font-bold text-gray-800 text-center outline-none focus:text-purple-600 transition cursor-pointer p-0 w-12"><option value="">08</option></select>
+                                    <span class="text-xl font-bold text-gray-400 pb-1">:</span>
+                                    <select name="closeMinute" class="appearance-none bg-transparent text-2xl font-bold text-gray-800 text-center outline-none focus:text-purple-600 transition cursor-pointer p-0 w-12"><option value="">00</option></select>
+                                    <select name="closePeriod" class="appearance-none bg-white border border-gray-300 text-xs font-bold text-gray-600 rounded-md px-2 py-1 ml-1 outline-none shadow-sm"><option value="PM" selected>PM</option><option value="AM">AM</option></select>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <div><label class="block text-sm font-bold text-gray-700 mb-2">업종 <span class="text-red-500">*</span></label><input type="text" name="industry" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" placeholder="예: 한식당, 유학원"></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-2">대표 서비스 <span class="text-red-500">*</span></label><input type="text" name="mainService" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" placeholder="예: 김밥, 법인설립"></div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">대표 이미지 <span class="text-red-500">*</span></label>
+                        <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition cursor-pointer group">
+                            <input type="file" name="image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewFile(this)">
+                            <div id="uploadPlaceholder"><svg class="w-10 h-10 text-gray-400 mx-auto mb-2 group-hover:text-purple-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><p class="text-sm text-gray-500">터치하여 사진 업로드</p></div>
+                            <img id="imagePreview" class="hidden max-h-40 mx-auto rounded-lg shadow-md object-cover">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-bold text-gray-700 mb-2">연락처 <span class="text-red-500">*</span></label><input type="tel" name="phone" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"></div>
+                        <div><label class="block text-sm font-bold text-gray-700 mb-2">이메일</label><input type="email" name="email" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"></div>
+                    </div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-2">홈페이지 / SNS</label><input type="url" name="website" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" placeholder="https://..."></div>
+                    <div><label class="block text-sm font-bold text-gray-700 mb-2">카카오톡 ID</label><input type="text" name="kakao" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"></div>
+                </div>
+
+                <div id="editRequestForm" class="space-y-6 hidden">
+                    <h3 class="text-xl font-bold text-gray-800 pb-2 border-b border-gray-100">🔒 소유주 인증 및 요청</h3>
+                    <div class="flex bg-gray-100 p-1 rounded-xl">
+                        <label class="flex-1 text-center py-2 rounded-lg cursor-pointer transition-all has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-purple-700"><input type="radio" name="editType" value="modify" class="hidden" checked onchange="toggleEditType()"><span class="text-sm font-bold">정보 수정</span></label>
+                        <label class="flex-1 text-center py-2 rounded-lg cursor-pointer transition-all has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-red-600"><input type="radio" name="editType" value="delete" class="hidden" onchange="toggleEditType()"><span class="text-sm font-bold">정보 삭제</span></label>
+                    </div>
+                    <div class="space-y-4">
+                        <input type="text" name="editBusinessName" placeholder="업체명 *" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="text" name="editAddress" placeholder="사업장 주소 *" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="text" name="editOwner" placeholder="대표자 성함 (소유주) *" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="tel" name="editPhone" placeholder="연락처 *" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
+                            <input type="email" name="editEmail" placeholder="이메일 *" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                    <div id="modifyDetails"><label class="block text-sm font-bold text-gray-700 mb-2">수정 요청사항 <span class="text-red-500">*</span></label><textarea name="modifyRequest" rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" placeholder="변경할 내용을 자세히 적어주세요."></textarea></div>
+                    <div id="deleteNotice" class="hidden bg-red-50 text-red-700 p-4 rounded-xl text-sm border border-red-100">⚠️ <strong>삭제 요청 안내</strong><br>최종 삭제 전 소유주 확인을 위해 기재하신 연락처로 확인 전화를 드립니다.</div>
+                </div>
+
+                <div class="mt-8"><button type="submit" class="w-full gradient-bg text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:opacity-95 transition transform active:scale-95">제출하기</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ▼▼▼▼▼▼▼▼▼▼ [중요] 배포된 Google Apps Script Web App URL을 여기에 붙여넣으세요 ▼▼▼▼▼▼▼▼▼▼
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5mMEqjj08UDuEM9ASp-CEfrSysWXMrqVjfwxemPqkZNEgPeYgoyhaK31kq9Yv5Hrb/exec"; 
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+        function initTimeOptions() {
+            const hours = Array.from({length: 12}, (_, i) => i + 1);
+            const minutes = ['00', '10', '20', '30', '40', '50'];
+            ['openHour', 'closeHour'].forEach(name => {
+                const el = document.querySelector(`select[name="${name}"]`);
+                if(el) { el.innerHTML = ''; hours.forEach(h => el.add(new Option(h, h))); }
+            });
+            ['openMinute', 'closeMinute'].forEach(name => {
+                const el = document.querySelector(`select[name="${name}"]`);
+                if(el) { el.innerHTML = ''; minutes.forEach(m => el.add(new Option(m, m))); }
+            });
+            if(document.querySelector(`select[name="openHour"]`)) document.querySelector(`select[name="openHour"]`).value = "10";
+            if(document.querySelector(`select[name="closeHour"]`)) document.querySelector(`select[name="closeHour"]`).value = "8";
+        }
+        function handleEditClick(e) { e.preventDefault(); document.getElementById('warningModal').classList.remove('hidden'); }
+        function closeModal(confirm) {
+            document.getElementById('warningModal').classList.add('hidden');
+            if (confirm) { document.getElementById('optionEdit').checked = true; switchTab('edit'); } 
+            else { if(!document.getElementById('optionEdit').checked) document.getElementById('optionNew').checked = true; }
+        }
+        document.getElementById('optionNew').addEventListener('change', () => switchTab('new'));
+        function switchTab(mode) {
+            const newForm = document.getElementById('newRegistrationForm');
+            const editForm = document.getElementById('editRequestForm');
+            if (mode === 'new') { newForm.classList.remove('hidden'); editForm.classList.add('hidden'); setRequired('new'); } 
+            else { newForm.classList.add('hidden'); editForm.classList.remove('hidden'); setRequired('edit'); }
+        }
+        function toggleEditType() {
+            const type = document.querySelector('input[name="editType"]:checked').value;
+            const modifyBox = document.getElementById('modifyDetails');
+            const deleteBox = document.getElementById('deleteNotice');
+            const reqText = document.querySelector('textarea[name="modifyRequest"]');
+            if (type === 'modify') { modifyBox.classList.remove('hidden'); deleteBox.classList.add('hidden'); reqText.required = true; } 
+            else { modifyBox.classList.add('hidden'); deleteBox.classList.remove('hidden'); reqText.required = false; }
+        }
+        function setRequired(mode) {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(el => el.required = false);
+            if (mode === 'new') {
+                const reqNames = ['businessName', 'address', 'openHour', 'openMinute', 'closeHour', 'closeMinute', 'industry', 'mainService', 'phone'];
+                reqNames.forEach(name => { const el = document.querySelector(`[name="${name}"]`); if(el) el.required = true; });
+            } else {
+                const reqNames = ['editBusinessName', 'editAddress', 'editOwner', 'editPhone', 'editEmail'];
+                reqNames.forEach(name => { const el = document.querySelector(`[name="${name}"]`); if(el) el.required = true; });
+                toggleEditType(); 
+            }
+        }
+        function previewFile(input) {
+            const preview = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('uploadPlaceholder');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { preview.src = e.target.result; preview.classList.remove('hidden'); placeholder.classList.add('hidden'); }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        function forceCloseWindow() {
+            window.open('','_self').close(); window.close();
+            setTimeout(() => { document.getElementById('successModal').classList.add('hidden'); location.reload(); }, 500);
+        }
+
+        // ============================================
+        // GitHub Pages용 fetch 통신 (수정된 부분)
+        // ============================================
+        document.getElementById('mainForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const loading = document.getElementById('loadingOverlay');
+            loading.classList.remove('hidden'); loading.classList.add('flex');
+
+            const mode = document.querySelector('input[name="mainOption"]:checked').value;
+            const formData = { formType: mode };
+
+            // 데이터 수집 (생략 없이 모두 수집)
+            if (mode === 'new') {
+                formData.businessName = document.querySelector('[name="businessName"]').value;
+                formData.address = document.querySelector('[name="address"]').value;
+                formData.industry = document.querySelector('[name="industry"]').value;
+                formData.mainService = document.querySelector('[name="mainService"]').value;
+                formData.phone = document.querySelector('[name="phone"]').value;
+                formData.email = document.querySelector('[name="email"]').value;
+                formData.website = document.querySelector('[name="website"]').value;
+                formData.kakao = document.querySelector('[name="kakao"]').value;
+                const oh = document.querySelector('[name="openHour"]').value;
+                const om = document.querySelector('[name="openMinute"]').value;
+                const op = document.querySelector('[name="openPeriod"]').value;
+                const ch = document.querySelector('[name="closeHour"]').value;
+                const cm = document.querySelector('[name="closeMinute"]').value;
+                const cp = document.querySelector('[name="closePeriod"]').value;
+                formData.businessHours = `${oh}:${om} ${op} ~ ${ch}:${cm} ${cp}`;
+
+                const fileInput = document.querySelector('input[name="image"]');
+                if (fileInput.files.length > 0) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        formData.imageData = e.target.result; 
+                        formData.imageMimeType = fileInput.files[0].type;
+                        submitToGAS(formData);
+                    };
+                    reader.readAsDataURL(fileInput.files[0]);
+                } else {
+                    alert('홍보 이미지를 등록해주세요.'); loading.classList.add('hidden'); return;
+                }
+            } else {
+                formData.editType = document.querySelector('input[name="editType"]:checked').value;
+                formData.businessName = document.querySelector('[name="editBusinessName"]').value;
+                formData.address = document.querySelector('[name="editAddress"]').value;
+                formData.owner = document.querySelector('[name="editOwner"]').value;
+                formData.phone = document.querySelector('[name="editPhone"]').value;
+                formData.email = document.querySelector('[name="editEmail"]').value;
+                formData.modifyRequest = document.querySelector('[name="modifyRequest"]').value;
+                submitToGAS(formData);
+            }
+        });
+
+        async function submitToGAS(data) {
+            try {
+                if (SCRIPT_URL.includes("여기에_복사한_URL")) {
+                    alert("스크립트 URL이 설정되지 않았습니다. index.html 파일을 열어 SCRIPT_URL을 수정해주세요.");
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    return;
+                }
+
+                // GitHub Pages -> Google Apps Script 통신 (no-cors)
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    mode: 'no-cors' 
+                });
+
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                
+                // 성공 모달 표시
+                const successModal = document.getElementById('successModal');
+                const msgText = document.getElementById('successMessageText');
+                msgText.innerText = "접수가 안전하게 처리되었습니다."; 
+                successModal.classList.remove('hidden');
+                successModal.classList.add('flex');
+
+                setTimeout(function() { forceCloseWindow(); }, 3000);
+
+            } catch (err) {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                alert('전송 중 오류가 발생했습니다: ' + err);
+            }
+        }
+
+        initTimeOptions();
+        setRequired('new');
+    </script>
+</body>
+</html>
