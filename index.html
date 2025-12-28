@@ -60,7 +60,7 @@
     <div class="min-h-screen py-10 px-4">
         <div class="max-w-xl mx-auto">
             <div class="bg-white rounded-3xl card-shadow pt-3 pb-4 px-3 mb-6 text-center">
-                <img src="https://static.wixstatic.com/media/cd1160_4159e89efaa54c9dbc6eb61c35a0f107~mv2.png" alt="Kornect Logo" class="h-60 mx-auto -mb-4 object-contain">
+                <img src="https://drive.google.com/thumbnail?id=1FoWG_L4oKEw-FDk6-kO6KY_6E8rU_mig&sz=w1000" alt="Kornect Logo" class="h-36 mx-auto -mb-4 object-contain">
                 <p class="text-gray-500 text-sm leading-relaxed break-keep">
                     "넓히다, 알리다, 그리고 무료로 누리다."
                     <br><span class="text-purple-600 font-medium">당신의 비즈니스! 지금 바로 등록하세요.</span>
@@ -68,12 +68,11 @@
             </div>
             
             <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 card-shadow">
-                <div class="text-center md:text-left">
-                    <h3 class="font-bold text-indigo-900 text-lg flex items-center justify-center md:justify-start gap-2">
-                        <span>🚀</span> 업체 홍보용 랜딩페이지 무료 제작
+                <div class="text-center md:text-left overflow-hidden"> <h3 class="font-bold text-indigo-900 text-lg flex items-center justify-center md:justify-start gap-2">
+                        <span>🚀</span> 업체 홍보용 랜딩페이지 <span class="text-indigo-600">무료 제작</span>
                     </h3>
-                    <p class="text-indigo-600 text-xs mt-1 break-keep">
-                        전문가가 제작하는 고퀄리티 웹페이지로 비즈니스를 홍보하세요.
+                    <p class="text-indigo-600 text-sm mt-1 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                        지금 신청하고 비즈니스를 성장시키세요!
                     </p>
                 </div>
                 <a href="https://www.b-ding.com/" target="_blank" class="shrink-0 bg-white text-indigo-600 text-sm font-bold py-2.5 px-5 rounded-xl border border-indigo-200 shadow-sm hover:bg-indigo-100 transition">
@@ -185,6 +184,11 @@
                     
                     <div><label class="block text-sm font-bold text-gray-700 mb-2">업체명 <span class="text-red-500">*</span></label><input type="text" name="landingBusinessName" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="상호명을 입력하세요"></div>
                     <div><label class="block text-sm font-bold text-gray-700 mb-2">대표자 성함 <span class="text-red-500">*</span></label><input type="text" name="landingOwner" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="대표자 성함"></div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">사업장 주소 <span class="text-red-500">*</span></label>
+                        <input type="text" name="landingAddress" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Google Maps 검색 가능한 주소">
+                    </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div><label class="block text-sm font-bold text-gray-700 mb-2">연락처 <span class="text-red-500">*</span></label><input type="tel" name="landingPhone" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"></div>
@@ -304,9 +308,8 @@
                 reqNames.forEach(name => { const el = document.querySelector(`[name="${name}"]`); if(el) el.required = true; });
                 toggleEditType(); 
             } else if (mode === 'landing') {
-                const reqNames = ['landingBusinessName', 'landingOwner', 'landingPhone', 'landingEmail', 'landingCatchphrase', 'landingDetails'];
+                const reqNames = ['landingBusinessName', 'landingOwner', 'landingAddress', 'landingPhone', 'landingEmail', 'landingCatchphrase', 'landingDetails'];
                 reqNames.forEach(name => { const el = document.querySelector(`[name="${name}"]`); if(el) el.required = true; });
-                // Note: Website, SNS, Kakao are optional, Images check handled manually in validation
             }
         }
 
@@ -320,7 +323,6 @@
             }
         }
 
-        // [신규] 랜딩페이지 다중 이미지 미리보기
         function previewLandingFiles(input) {
             const previewBox = document.getElementById('landingImagePreviewBox');
             const placeholder = document.getElementById('landingUploadPlaceholder');
@@ -328,11 +330,11 @@
             if (input.files && input.files.length > 0) {
                 if (input.files.length > 3) {
                     alert('최대 3장까지만 업로드 가능합니다.');
-                    input.value = ''; // 초기화
+                    input.value = ''; 
                     return;
                 }
 
-                previewBox.innerHTML = ''; // 초기화
+                previewBox.innerHTML = ''; 
                 previewBox.classList.remove('hidden');
                 placeholder.classList.add('hidden');
 
@@ -357,7 +359,6 @@
             setTimeout(() => { document.getElementById('successModal').classList.add('hidden'); location.reload(); }, 500);
         }
 
-        // 파일 읽기 헬퍼 함수 (Promise 반환)
         const readFiles = (files) => {
             return Promise.all(Array.from(files).map(file => {
                 return new Promise((resolve, reject) => {
@@ -421,18 +422,18 @@
                 } else if (mode === 'landing') {
                     formData.businessName = document.querySelector('[name="landingBusinessName"]').value;
                     formData.owner = document.querySelector('[name="landingOwner"]').value;
+                    formData.address = document.querySelector('[name="landingAddress"]').value; 
                     formData.phone = document.querySelector('[name="landingPhone"]').value;
                     formData.email = document.querySelector('[name="landingEmail"]').value;
-                    formData.website = document.querySelector('[name="landingWebsite"]').value; // 추가
-                    formData.sns = document.querySelector('[name="landingSNS"]').value; // 추가
-                    formData.kakao = document.querySelector('[name="landingKakao"]').value; // 추가
+                    formData.website = document.querySelector('[name="landingWebsite"]').value; 
+                    formData.sns = document.querySelector('[name="landingSNS"]').value; 
+                    formData.kakao = document.querySelector('[name="landingKakao"]').value; 
                     formData.catchphrase = document.querySelector('[name="landingCatchphrase"]').value;
                     formData.details = document.querySelector('[name="landingDetails"]').value;
                     
                     const fileInput = document.querySelector('input[name="landingImages"]');
                     if (fileInput.files.length > 0) {
                         if (fileInput.files.length > 3) throw new Error('사진은 최대 3장까지만 가능합니다.');
-                        // 다중 파일 처리
                         formData.landingImages = await readFiles(fileInput.files);
                     } else {
                         throw new Error('업체 대표 사진을 최소 1장 등록해주세요.');
