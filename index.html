@@ -17,6 +17,8 @@
         .modal-bg { background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #7c3aed; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* 추가 커스텀 유틸리티: 한글 단어 줄바꿈 방지 */
+        .break-keep { word-break: keep-all; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -68,11 +70,11 @@
             </div>
             
             <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-6 mb-6 flex flex-col md:flex-row items-center md:justify-between gap-4 md:gap-6 card-shadow">
-                <div class="text-center md:text-left overflow-hidden w-full md:w-auto">
-                    <h3 class="font-bold text-indigo-900 text-lg flex items-center justify-center md:justify-start gap-2">
-                        <span>🚀</span> 업체 홍보용 랜딩페이지 <span class="text-indigo-600">무료 제작</span>
+                <div class="text-center md:text-left w-full md:w-auto">
+                    <h3 class="font-bold text-indigo-900 text-lg break-keep leading-snug">
+                        <span class="mr-1">🚀</span>업체 홍보용 랜딩페이지 <span class="text-indigo-600">무료 제작</span>
                     </h3>
-                    <p class="text-indigo-600 text-sm mt-1 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                    <p class="text-indigo-600 text-sm mt-2 font-medium break-keep leading-snug">
                         지금 신청하고 비즈니스를 성장시키세요!
                     </p>
                 </div>
