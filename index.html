@@ -2,249 +2,353 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kornect - 업체 등록 및 수정</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kornect - 파트너 센터</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f9fafb; }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .card-shadow { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
-        .radio-option { transition: all 0.2s ease; border: 2px solid #e5e7eb; }
-        .radio-option:hover { border-color: #8b5cf6; transform: translateY(-2px); }
-        .radio-option input:checked + label { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-color: transparent; }
-        .radio-option input:checked + label svg { color: white; }
-        .modal-bg { background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px); }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #7c3aed; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        body { 
+            font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #F8FAFC; 
+            color: #334155;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* 스크롤바 숨김 */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 그라데이션 텍스트 & 배경 */
+        .text-gradient { background: linear-gradient(to right, #4f46e5, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .bg-gradient-primary { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+
+        /* 카드 쉐도우 */
+        .card-shadow { box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); }
+        
+        /* 라디오 버튼 선택 스타일 */
+        .radio-card:checked + label {
+            background-color: #eff6ff;
+            border-color: #6366f1;
+            color: #4f46e5;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.1);
+        }
+        .radio-card:checked + label i { color: #4f46e5; }
+        
+        /* 모달 오버레이 */
+        .modal-bg { background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+        
+        /* 로딩 스피너 */
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #6366f1; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* 추가 커스텀 유틸리티: 한글 단어 줄바꿈 방지 */
+        
         .break-keep { word-break: keep-all; }
     </style>
 </head>
-<body class="text-gray-800">
-    <div id="loadingOverlay" class="fixed inset-0 modal-bg z-50 hidden flex flex-col justify-center items-center">
-        <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center">
-            <div class="loader mb-4"></div>
-            <p class="text-gray-600 font-medium">데이터를 안전하게 저장 중입니다...</p>
+<body class="bg-slate-50 min-h-screen">
+
+    <div id="loadingOverlay" class="fixed inset-0 modal-bg z-50 hidden flex flex-col justify-center items-center transition-opacity">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center max-w-xs w-full mx-4">
+            <div class="loader mb-5"></div>
+            <h3 class="text-lg font-bold text-slate-800 mb-1">처리 중입니다</h3>
+            <p class="text-sm text-slate-500">잠시만 기다려주세요...</p>
         </div>
     </div>
+
     <div id="warningModal" class="fixed inset-0 modal-bg z-40 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-8 max-w-sm w-full card-shadow transform transition-all scale-100">
+        <div class="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl transform transition-all scale-100">
             <div class="text-center">
-                <div class="bg-yellow-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <i class="fas fa-lock text-2xl text-amber-500"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">소유주 확인 필요</h3>
-                <p class="text-gray-500 mb-6 text-sm break-keep">본 업체의 소유주만 정보 수정 및 삭제 요청이 가능합니다. 계속 하시겠습니까?</p>
-                <div class="flex gap-3">
-                    <button onclick="closeModal(false)" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-300 transition">취소</button>
-                    <button onclick="closeModal(true)" class="flex-1 gradient-bg text-white py-3 rounded-xl font-medium hover:opacity-90 transition shadow-lg">확인</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="successModal" class="fixed inset-0 modal-bg z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-8 max-w-sm w-full card-shadow transform transition-all scale-100">
-            <div class="text-center">
-                <div class="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">접수 완료</h3>
-                <div class="text-gray-500 mb-6 text-sm break-keep space-y-1">
-                    <p id="successMessageText">성공적으로 처리되었습니다.</p>
-                    <p class="text-xs text-purple-600 font-medium animate-pulse">잠시 후 창이 자동으로 닫힙니다...</p>
-                </div>
-                <button onclick="forceCloseWindow()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-medium hover:bg-gray-200 transition">지금 닫기</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="min-h-screen py-10 px-4">
-        <div class="max-w-xl mx-auto">
-            <div class="bg-white rounded-3xl card-shadow pt-8 pb-8 px-6 mb-6 text-center">
-                <img src="https://drive.google.com/thumbnail?id=1FoWG_L4oKEw-FDk6-kO6KY_6E8rU_mig&sz=w1000" alt="Kornect Logo" class="h-28 mx-auto object-contain mb-4">
-                <p class="text-gray-500 text-sm leading-relaxed break-keep">
-                    "넓히다, 알리다, 그리고 무료로 누리다."
-                    <br><span class="text-purple-600 font-medium">당신의 비즈니스! 지금 바로 등록하세요.</span>
+                <h3 class="text-xl font-bold text-slate-900 mb-3">소유주 확인 필요</h3>
+                <p class="text-slate-500 mb-8 text-[15px] leading-relaxed break-keep">
+                    업체 정보의 수정 및 삭제는<br><strong>실제 소유주</strong>만 요청할 수 있습니다.<br>계속 진행하시겠습니까?
                 </p>
-            </div>
-            
-            <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-6 mb-6 flex flex-col md:flex-row items-center md:justify-between gap-4 md:gap-6 card-shadow">
-                <div class="text-center md:text-left w-full md:w-auto">
-                    <h3 class="font-bold text-indigo-900 text-lg break-keep leading-snug">
-                        <span class="mr-1">🚀</span>홍보용 랜딩페이지 <span class="text-indigo-600">무료 제작</span>
-                    </h3>
-                    <p class="text-indigo-600 text-sm mt-2 font-medium break-keep leading-snug">
-                        지금 신청하고 비즈니스를 성장시키세요!
-                    </p>
-                </div>
-                <a href="https://littlespoon-kornect.netlify.app/" target="_blank" class="w-full md:w-auto shrink-0 bg-white text-indigo-600 text-sm font-bold py-3 md:py-2.5 px-5 rounded-xl border border-indigo-200 shadow-sm hover:bg-indigo-100 transition text-center">
-                    예시보기 >
-                </a>
-            </div>
-
-            <div class="bg-white rounded-3xl card-shadow p-6 mb-6">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 text-center">원하시는 서비스를 선택하세요</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="radio-option rounded-xl overflow-hidden cursor-pointer relative">
-                        <input type="radio" name="mainOption" id="optionNew" value="new" class="hidden peer" checked>
-                        <label for="optionNew" class="block p-4 cursor-pointer text-center h-full flex flex-col justify-center items-center min-h-[120px]">
-                            <svg class="w-8 h-8 mb-2 text-gray-400 peer-checked:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                            <span class="font-semibold text-sm block">신규 업체<br>등록</span>
-                        </label>
-                    </div>
-                    <div class="radio-option rounded-xl overflow-hidden cursor-pointer relative">
-                        <input type="radio" name="mainOption" id="optionEdit" value="edit" class="hidden peer">
-                        <label for="optionEdit" onclick="handleEditClick(event)" class="block p-4 cursor-pointer text-center h-full flex flex-col justify-center items-center min-h-[120px]">
-                            <svg class="w-8 h-8 mb-2 text-gray-400 peer-checked:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            <span class="font-semibold text-sm block">정보 수정<br>/삭제</span>
-                        </label>
-                    </div>
-                    <div class="radio-option rounded-xl overflow-hidden cursor-pointer relative">
-                        <input type="radio" name="mainOption" id="optionLanding" value="landing" class="hidden peer">
-                        <label for="optionLanding" class="block p-4 cursor-pointer text-center h-full flex flex-col justify-center items-center min-h-[120px]">
-                            <svg class="w-8 h-8 mb-2 text-gray-400 peer-checked:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span class="font-semibold text-sm block">랜딩페이지<br>신청 (무료)</span>
-                        </label>
-                    </div>
+                <div class="flex gap-3">
+                    <button onclick="closeModal(false)" class="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 text-slate-600 font-bold hover:bg-slate-50 transition">취소</button>
+                    <button onclick="closeModal(true)" class="flex-1 py-3.5 rounded-2xl bg-slate-900 text-white font-bold hover:bg-black transition shadow-lg">확인</button>
                 </div>
             </div>
-            
-            <form id="mainForm" class="bg-white rounded-3xl card-shadow p-8 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-2 gradient-bg"></div>
+        </div>
+    </div>
 
-                <div id="newRegistrationForm" class="space-y-6">
-                    <h3 class="text-xl font-bold text-gray-800 pb-2 border-b border-gray-100">📝 신규 등록 정보</h3>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-2">업체명 <span class="text-red-500">*</span></label><input type="text" name="businessName" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:bg-white transition outline-none" placeholder="상호명을 입력하세요"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-2">사업장 주소 <span class="text-red-500">*</span></label><input type="text" name="address" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:bg-white transition outline-none" placeholder="Google Maps 검색 가능한 주소"></div>
+    <div id="successModal" class="fixed inset-0 modal-bg z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <i class="fas fa-check text-2xl text-green-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">접수 완료!</h3>
+                <div class="text-slate-500 mb-8 text-[15px] leading-relaxed break-keep space-y-1">
+                    <p id="successMessageText">요청하신 내용이 안전하게 전송되었습니다.</p>
+                    <p class="text-xs text-indigo-500 font-bold animate-pulse mt-2">잠시 후 자동으로 닫힙니다...</p>
+                </div>
+                <button onclick="forceCloseWindow()" class="w-full bg-slate-100 text-slate-600 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">지금 닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-2xl mx-auto py-12 px-5">
+        
+        <div class="text-center mb-10">
+            <div class="inline-block p-4 bg-white rounded-3xl shadow-sm mb-4">
+                <img src="https://drive.google.com/thumbnail?id=1FoWG_L4oKEw-FDk6-kO6KY_6E8rU_mig&sz=w1000" alt="Kornect Logo" class="h-16 object-contain">
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 mb-2">Partner Center</h1>
+            <p class="text-slate-500 text-sm font-medium">당신의 비즈니스를 전 세계와 연결하세요.</p>
+        </div>
+
+        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-[2rem] p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-sm relative overflow-hidden">
+            <div class="relative z-10 text-center sm:text-left">
+                <span class="bg-white/80 backdrop-blur text-indigo-600 text-[10px] font-bold px-2 py-1 rounded-md border border-indigo-100 mb-2 inline-block">EVENT</span>
+                <h3 class="font-bold text-slate-800 text-lg leading-snug">
+                    홍보용 랜딩페이지 <span class="text-indigo-600">무료 제작</span> 🚀
+                </h3>
+                <p class="text-slate-500 text-sm mt-1 font-medium">지금 신청하고 비즈니스를 성장시키세요!</p>
+            </div>
+            <a href="https://littlespoon-kornect.netlify.app/" target="_blank" class="relative z-10 bg-white text-indigo-600 text-sm font-bold py-3 px-6 rounded-xl border border-indigo-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all whitespace-nowrap">
+                예시 보기 <i class="fas fa-chevron-right text-xs ml-1"></i>
+            </a>
+            <div class="absolute -right-6 -top-6 w-24 h-24 bg-purple-200/30 rounded-full blur-xl"></div>
+        </div>
+
+        <div class="bg-white rounded-[2rem] shadow-lg shadow-slate-200/50 p-6 mb-6">
+            <h2 class="text-base font-bold text-slate-800 mb-4 ml-1">원하시는 서비스를 선택하세요</h2>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="relative">
+                    <input type="radio" name="mainOption" id="optionNew" value="new" class="radio-card hidden" checked>
+                    <label for="optionNew" class="flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 cursor-pointer transition-all hover:bg-white h-full min-h-[110px]">
+                        <i class="fas fa-store text-2xl text-slate-400 mb-2 transition-colors"></i>
+                        <span class="text-xs font-bold text-center leading-tight">신규 업체<br>등록</span>
+                    </label>
+                </div>
+                <div class="relative">
+                    <input type="radio" name="mainOption" id="optionEdit" value="edit" class="radio-card hidden">
+                    <label for="optionEdit" onclick="handleEditClick(event)" class="flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 cursor-pointer transition-all hover:bg-white h-full min-h-[110px]">
+                        <i class="fas fa-edit text-2xl text-slate-400 mb-2 transition-colors"></i>
+                        <span class="text-xs font-bold text-center leading-tight">정보 수정<br>/삭제</span>
+                    </label>
+                </div>
+                <div class="relative">
+                    <input type="radio" name="mainOption" id="optionLanding" value="landing" class="radio-card hidden">
+                    <label for="optionLanding" class="flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 cursor-pointer transition-all hover:bg-white h-full min-h-[110px]">
+                        <i class="fas fa-laptop-code text-2xl text-slate-400 mb-2 transition-colors"></i>
+                        <span class="text-xs font-bold text-center leading-tight">랜딩페이지<br>신청 (무료)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <form id="mainForm" class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 p-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-primary"></div>
+
+            <div id="newRegistrationForm" class="space-y-6">
+                <div class="pb-4 border-b border-slate-100 mb-2">
+                    <h3 class="text-lg font-bold text-slate-900">📝 신규 업체 정보 입력</h3>
+                    <p class="text-xs text-slate-400 mt-1">정확한 정보를 입력해주시면 심사 후 등록됩니다.</p>
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">업체명 <span class="text-rose-500">*</span></label>
+                        <input type="text" name="businessName" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="상호명을 입력하세요">
+                    </div>
                     
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-3">영업시간 <span class="text-red-500">*</span></label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                             <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex flex-col items-center justify-center relative shadow-sm">
-                                <span class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm tracking-wider">OPEN</span>
-                                <div class="flex items-center gap-1 mt-2">
-                                    <select name="openHour" class="appearance-none bg-transparent text-2xl font-bold text-gray-800 text-center outline-none focus:text-blue-600 transition cursor-pointer p-0 w-12"><option value="">10</option></select>
-                                    <span class="text-xl font-bold text-gray-400 pb-1">:</span>
-                                    <select name="openMinute" class="appearance-none bg-transparent text-2xl font-bold text-gray-800 text-center outline-none focus:text-blue-600 transition cursor-pointer p-0 w-12"><option value="">00</option></select>
-                                    <select name="openPeriod" class="appearance-none bg-white border border-blue-200 text-xs font-bold text-blue-600 rounded-md px-2 py-1 ml-1 outline-none shadow-sm"><option value="AM">AM</option><option value="PM">PM</option></select>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">사업장 주소 <span class="text-rose-500">*</span></label>
+                        <input type="text" name="address" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="Google Maps 검색 가능한 주소">
+                    </div>
+
+                    <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100">
+                        <label class="block text-xs font-bold text-slate-500 mb-3 ml-1">영업시간 <span class="text-rose-500">*</span></label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="bg-white ring-1 ring-slate-200 p-3 rounded-xl flex flex-col items-center relative">
+                                <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded mb-1">OPEN</span>
+                                <div class="flex items-center gap-1">
+                                    <select name="openHour" class="bg-transparent font-bold text-lg text-slate-800 outline-none cursor-pointer p-0"><option value="">10</option></select>
+                                    <span class="text-slate-300 font-light">:</span>
+                                    <select name="openMinute" class="bg-transparent font-bold text-lg text-slate-800 outline-none cursor-pointer p-0"><option value="">00</option></select>
+                                    <select name="openPeriod" class="bg-slate-100 text-xs font-bold text-slate-600 rounded px-1 ml-1 outline-none"><option value="AM">AM</option><option value="PM">PM</option></select>
                                 </div>
-                             </div>
-                             <div class="bg-gray-50 border border-gray-200 p-4 rounded-2xl flex flex-col items-center justify-center relative shadow-sm">
-                                <span class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm tracking-wider">CLOSE</span>
-                                <div class="flex items-center gap-1 mt-2">
-                                    <select name="closeHour" class="appearance-none bg-transparent text-2xl font-bold text-gray-800 text-center outline-none focus:text-purple-600 transition cursor-pointer p-0 w-12"><option value="">08</option></select>
-                                    <span class="text-xl font-bold text-gray-400 pb-1">:</span>
-                                    <select name="closeMinute" class="appearance-none bg-transparent text-2xl font-bold text-gray-800 text-center outline-none focus:text-purple-600 transition cursor-pointer p-0 w-12"><option value="">00</option></select>
-                                    <select name="closePeriod" class="appearance-none bg-white border border-gray-300 text-xs font-bold text-gray-600 rounded-md px-2 py-1 ml-1 outline-none shadow-sm"><option value="PM" selected>PM</option><option value="AM">AM</option></select>
+                            </div>
+                            <div class="bg-white ring-1 ring-slate-200 p-3 rounded-xl flex flex-col items-center relative">
+                                <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded mb-1">CLOSE</span>
+                                <div class="flex items-center gap-1">
+                                    <select name="closeHour" class="bg-transparent font-bold text-lg text-slate-800 outline-none cursor-pointer p-0"><option value="">08</option></select>
+                                    <span class="text-slate-300 font-light">:</span>
+                                    <select name="closeMinute" class="bg-transparent font-bold text-lg text-slate-800 outline-none cursor-pointer p-0"><option value="">00</option></select>
+                                    <select name="closePeriod" class="bg-slate-100 text-xs font-bold text-slate-600 rounded px-1 ml-1 outline-none"><option value="PM" selected>PM</option><option value="AM">AM</option></select>
                                 </div>
-                             </div>
+                            </div>
                         </div>
                     </div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-2">업종 <span class="text-red-500">*</span></label><input type="text" name="industry" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" placeholder="예: 한식당, 유학원"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-2">대표 서비스 <span class="text-red-500">*</span></label><input type="text" name="mainService" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" placeholder="예: 김밥, 법인설립"></div>
+
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">대표 이미지 <span class="text-red-500">*</span></label>
-                        <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition cursor-pointer group">
-                            <input type="file" name="image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewFile(this)">
-                            <div id="uploadPlaceholder"><svg class="w-10 h-10 text-gray-400 mx-auto mb-2 group-hover:text-purple-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><p class="text-sm text-gray-500">터치하여 사진 업로드</p></div>
-                            <img id="imagePreview" class="hidden max-h-40 mx-auto rounded-lg shadow-md object-cover">
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">업종 / 대표 서비스 <span class="text-rose-500">*</span></label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="text" name="industry" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="예: 한식당">
+                            <input type="text" name="mainService" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="예: 김밥, 찌개">
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-bold text-gray-700 mb-2">연락처 <span class="text-red-500">*</span></label><input type="tel" name="phone" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"></div>
-                        <div><label class="block text-sm font-bold text-gray-700 mb-2">이메일</label><input type="email" name="email" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"></div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">대표 이미지 <span class="text-rose-500">*</span></label>
+                        <div class="relative w-full border-2 border-dashed border-indigo-100 bg-indigo-50/30 rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition-all group overflow-hidden">
+                            <input type="file" name="image" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="previewFile(this)">
+                            
+                            <div id="uploadPlaceholder" class="text-center pointer-events-none">
+                                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-2 shadow-sm group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-camera text-indigo-400 text-lg"></i>
+                                </div>
+                                <p class="text-xs font-bold text-indigo-400">사진을 등록해주세요</p>
+                            </div>
+                            <img id="imagePreview" class="absolute inset-0 w-full h-full object-cover hidden rounded-2xl">
+                        </div>
                     </div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-2">홈페이지 / SNS</label><input type="url" name="website" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" placeholder="https://..."></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-2">카카오톡 ID</label><input type="text" name="kakao" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none"></div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">연락처 <span class="text-rose-500">*</span></label>
+                            <input type="tel" name="phone" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">이메일</label>
+                            <input type="email" name="email" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">홈페이지 / SNS</label>
+                        <input type="url" name="website" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">카카오톡 ID</label>
+                        <input type="text" name="kakao" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <div id="editRequestForm" class="space-y-6 hidden">
+                <div class="pb-4 border-b border-slate-100 mb-2">
+                    <h3 class="text-lg font-bold text-slate-900">🔒 정보 수정 및 삭제 요청</h3>
+                    <p class="text-xs text-slate-400 mt-1">소유주 확인 후 처리가 진행됩니다.</p>
                 </div>
 
-                <div id="editRequestForm" class="space-y-6 hidden">
-                    <h3 class="text-xl font-bold text-gray-800 pb-2 border-b border-gray-100">🔒 소유주 인증 및 요청</h3>
-                    <div class="flex bg-gray-100 p-1 rounded-xl">
-                        <label class="flex-1 text-center py-2 rounded-lg cursor-pointer transition-all has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-purple-700"><input type="radio" name="editType" value="modify" class="hidden" checked onchange="toggleEditType()"><span class="text-sm font-bold">정보 수정</span></label>
-                        <label class="flex-1 text-center py-2 rounded-lg cursor-pointer transition-all has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-red-600"><input type="radio" name="editType" value="delete" class="hidden" onchange="toggleEditType()"><span class="text-sm font-bold">정보 삭제</span></label>
-                    </div>
-                    <div class="space-y-4">
-                        <input type="text" name="editBusinessName" placeholder="업체명 *" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
-                        <input type="text" name="editAddress" placeholder="사업장 주소 *" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
-                        <input type="text" name="editOwner" placeholder="대표자 성함 (소유주) *" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="tel" name="editPhone" placeholder="연락처 *" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
-                            <input type="email" name="editEmail" placeholder="이메일 *" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                    </div>
-                    <div id="modifyDetails"><label class="block text-sm font-bold text-gray-700 mb-2">수정 요청사항 <span class="text-red-500">*</span></label><textarea name="modifyRequest" rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" placeholder="변경할 내용을 자세히 적어주세요."></textarea></div>
-                    <div id="deleteNotice" class="hidden bg-red-50 text-red-700 p-4 rounded-xl text-sm border border-red-100">⚠️ <strong>삭제 요청 안내</strong><br>최종 삭제 전 소유주 확인을 위해 기재하신 연락처로 확인 전화를 드립니다.</div>
+                <div class="flex bg-slate-100 p-1.5 rounded-2xl">
+                    <label class="flex-1 text-center py-2.5 rounded-xl cursor-pointer transition-all has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-indigo-600">
+                        <input type="radio" name="editType" value="modify" class="hidden" checked onchange="toggleEditType()">
+                        <span class="text-sm font-bold">정보 수정</span>
+                    </label>
+                    <label class="flex-1 text-center py-2.5 rounded-xl cursor-pointer transition-all has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:checked]:text-rose-500">
+                        <input type="radio" name="editType" value="delete" class="hidden" onchange="toggleEditType()">
+                        <span class="text-sm font-bold">정보 삭제</span>
+                    </label>
                 </div>
 
-                <div id="landingPageForm" class="space-y-6 hidden">
-                    <h3 class="text-xl font-bold text-indigo-800 pb-2 border-b border-indigo-100">🌐 랜딩페이지 제작 요청</h3>
-                    <p class="text-sm text-gray-500 bg-indigo-50 p-4 rounded-xl">
-                        랜딩페이지 제작에 필요한 기초 정보를 입력해주세요.<br>
-                        정보가 없는 항목은 공란으로 비워두셔도 됩니다.
-                    </p>
-                    
-                    <div><label class="block text-sm font-bold text-gray-700 mb-2">업체명 <span class="text-red-500">*</span></label><input type="text" name="landingBusinessName" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="상호명을 입력하세요"></div>
-                    <div><label class="block text-sm font-bold text-gray-700 mb-2">대표자 성함 <span class="text-red-500">*</span></label><input type="text" name="landingOwner" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="대표자 성함"></div>
+                <div class="space-y-4">
+                    <input type="text" name="editBusinessName" placeholder="업체명 *" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400">
+                    <input type="text" name="editAddress" placeholder="사업장 주소 *" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400">
+                    <input type="text" name="editOwner" placeholder="대표자 성함 (소유주) *" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="tel" name="editPhone" placeholder="연락처 *" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                        <input type="email" name="editEmail" placeholder="이메일 *" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                    </div>
+                </div>
+
+                <div id="modifyDetails">
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">수정 요청사항 <span class="text-rose-500">*</span></label>
+                    <textarea name="modifyRequest" rows="3" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all resize-none placeholder:text-slate-400" placeholder="변경할 내용을 자세히 적어주세요."></textarea>
+                </div>
+
+                <div id="deleteNotice" class="hidden bg-rose-50/70 text-rose-700 p-5 rounded-2xl text-sm border border-rose-100 leading-relaxed">
+                    <strong class="block mb-1"><i class="fas fa-exclamation-circle mr-1"></i> 삭제 요청 안내</strong>
+                    최종 삭제 전 소유주 확인을 위해 기재하신 연락처로 담당자가 확인 전화를 드립니다.
+                </div>
+            </div>
+
+            <div id="landingPageForm" class="space-y-6 hidden">
+                <div class="pb-4 border-b border-indigo-50 mb-2">
+                    <h3 class="text-lg font-bold text-indigo-900">🌐 랜딩페이지 제작 요청</h3>
+                    <p class="text-xs text-indigo-400 mt-1">제작에 필요한 기초 정보를 입력해주세요.</p>
+                </div>
+
+                <div class="bg-indigo-50/50 p-4 rounded-2xl text-[13px] text-indigo-700 font-medium leading-relaxed border border-indigo-100">
+                    <i class="fas fa-info-circle mr-1"></i> 정보가 없는 항목은 공란으로 비워두셔도 됩니다.
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">업체명 <span class="text-rose-500">*</span></label>
+                        <input type="text" name="landingBusinessName" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="상호명을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">대표자 성함 <span class="text-rose-500">*</span></label>
+                        <input type="text" name="landingOwner" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="성함을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">사업장 주소 <span class="text-rose-500">*</span></label>
+                        <input type="text" name="landingAddress" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="Google Maps 검색 가능한 주소">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">연락처 <span class="text-rose-500">*</span></label>
+                            <input type="tel" name="landingPhone" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">이메일 <span class="text-rose-500">*</span></label>
+                            <input type="email" name="landingEmail" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                    </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">사업장 주소 <span class="text-red-500">*</span></label>
-                        <input type="text" name="landingAddress" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Google Maps 검색 가능한 주소">
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-bold text-gray-700 mb-2">연락처 <span class="text-red-500">*</span></label><input type="tel" name="landingPhone" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"></div>
-                        <div><label class="block text-sm font-bold text-gray-700 mb-2">이메일 <span class="text-red-500">*</span></label><input type="email" name="landingEmail" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"></div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">홈페이지 주소 <span class="text-gray-400 font-normal">(선택)</span></label>
-                        <input type="url" name="landingWebsite" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="https://...">
-                        <p class="text-xs text-gray-400 mt-1">정보가 없으면 비워두셔도 됩니다.</p>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">홈페이지 / SNS / 카카오톡</label>
+                        <div class="space-y-3">
+                            <input type="url" name="landingWebsite" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="홈페이지 주소 (https://...)">
+                            <input type="text" name="landingSNS" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="SNS 주소 (쉼표로 구분)">
+                            <input type="text" name="landingKakao" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="카카오톡 ID 또는 오픈채팅 URL">
+                        </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">SNS 주소 (인스타/유튜브/틱톡 등) <span class="text-gray-400 font-normal">(선택)</span></label>
-                        <input type="text" name="landingSNS" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="여러 개인 경우 쉼표(,)로 구분해주세요">
-                        <p class="text-xs text-gray-400 mt-1">정보가 없으면 비워두셔도 됩니다.</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">카카오톡 ID / 오픈채팅 URL <span class="text-gray-400 font-normal">(선택)</span></label>
-                        <input type="text" name="landingKakao" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <p class="text-xs text-gray-400 mt-1">정보가 없으면 비워두셔도 됩니다.</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">업체 대표 사진 <span class="text-red-500">*</span> <span class="text-gray-400 font-normal">(최대 3장)</span></label>
-                        <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition cursor-pointer group">
-                            <input type="file" name="landingImages" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewLandingFiles(this)">
-                            <div id="landingUploadPlaceholder">
-                                <svg class="w-10 h-10 text-gray-400 mx-auto mb-2 group-hover:text-purple-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                <p class="text-sm text-gray-500">매장 정면, 메뉴, 로고, 프로필 등<br>최대 3장까지 선택하세요</p>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">업체 대표 사진 <span class="text-rose-500">*</span> <span class="text-slate-400 font-normal">(최대 3장)</span></label>
+                        <div class="relative border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center hover:bg-slate-50 hover:border-indigo-300 transition-all cursor-pointer group bg-slate-50/50">
+                            <input type="file" name="landingImages" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="previewLandingFiles(this)">
+                            
+                            <div id="landingUploadPlaceholder" class="pointer-events-none">
+                                <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-2 text-slate-400 group-hover:text-indigo-500 group-hover:bg-indigo-100 transition-colors">
+                                    <i class="fas fa-images"></i>
+                                </div>
+                                <p class="text-xs text-slate-500 font-bold">사진을 선택해주세요</p>
                             </div>
                             <div id="landingImagePreviewBox" class="hidden flex gap-2 justify-center mt-2 flex-wrap"></div>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">홍보 문구 (슬로건) <span class="text-red-500">*</span></label>
-                        <input type="text" name="landingCatchphrase" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="예: 정성을 담은 집밥, 엄마의 손맛">
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">홍보 문구 (슬로건) <span class="text-rose-500">*</span></label>
+                        <input type="text" name="landingCatchphrase" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400" placeholder="예: 정성을 담은 집밥, 엄마의 손맛">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">상세 소개 및 요청사항 <span class="text-red-500">*</span></label>
-                        <textarea name="landingDetails" rows="5" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500" placeholder="업체의 특징, 메뉴, 강조하고 싶은 내용 등을 자유롭게 적어주세요. 참고할만한 사이트가 있다면 URL을 적어주셔도 좋습니다."></textarea>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 ml-1">상세 소개 및 요청사항 <span class="text-rose-500">*</span></label>
+                        <textarea name="landingDetails" rows="5" class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500 transition-all resize-none placeholder:text-slate-400 leading-relaxed" placeholder="업체의 특징, 메뉴, 강조하고 싶은 내용 등을 자유롭게 적어주세요."></textarea>
                     </div>
                 </div>
+            </div>
 
-                <div class="mt-8"><button type="submit" class="w-full gradient-bg text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:opacity-95 transition transform active:scale-95">제출하기</button></div>
-            </form>
-        </div>
+            <div class="mt-8 pt-4 border-t border-slate-100">
+                <button type="submit" class="w-full bg-gradient-primary text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-indigo-200 hover:shadow-xl hover:opacity-95 transition-all transform active:scale-[0.98]">
+                    제출하기
+                </button>
+            </div>
+        </form>
     </div>
+
     <script>
-        // [중요] 앱스크립트 배포 URL (기존 URL 유지)
+        // 백엔드 URL (기존 URL 유지)
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx7QBBKklyOcVDPAHOCBc7sVGf9_u1LSTC12NmquZkHOZYBh0U_Lw8q1qfWLctHLNvZ/exec"; 
         
         function initTimeOptions() {
@@ -261,7 +365,9 @@
             if(document.querySelector(`select[name="openHour"]`)) document.querySelector(`select[name="openHour"]`).value = "10";
             if(document.querySelector(`select[name="closeHour"]`)) document.querySelector(`select[name="closeHour"]`).value = "8";
         }
+
         function handleEditClick(e) { e.preventDefault(); document.getElementById('warningModal').classList.remove('hidden'); }
+        
         function closeModal(confirm) {
             document.getElementById('warningModal').classList.add('hidden');
             if (confirm) { document.getElementById('optionEdit').checked = true; switchTab('edit'); } 
@@ -272,21 +378,13 @@
         document.getElementById('optionLanding').addEventListener('change', () => switchTab('landing'));
 
         function switchTab(mode) {
-            const newForm = document.getElementById('newRegistrationForm');
-            const editForm = document.getElementById('editRequestForm');
-            const landingForm = document.getElementById('landingPageForm');
-            
-            newForm.classList.add('hidden');
-            editForm.classList.add('hidden');
-            landingForm.classList.add('hidden');
-
-            if (mode === 'new') { 
-                newForm.classList.remove('hidden'); 
-            } else if (mode === 'edit') { 
-                editForm.classList.remove('hidden'); 
-            } else if (mode === 'landing') {
-                landingForm.classList.remove('hidden');
-            }
+            const forms = {
+                new: document.getElementById('newRegistrationForm'),
+                edit: document.getElementById('editRequestForm'),
+                landing: document.getElementById('landingPageForm')
+            };
+            Object.values(forms).forEach(f => f.classList.add('hidden'));
+            forms[mode].classList.remove('hidden');
             setRequired(mode);
         }
 
@@ -304,15 +402,18 @@
             inputs.forEach(el => el.required = false);
             
             if (mode === 'new') {
-                const reqNames = ['businessName', 'address', 'openHour', 'openMinute', 'closeHour', 'closeMinute', 'industry', 'mainService', 'phone'];
-                reqNames.forEach(name => { const el = document.querySelector(`[name="${name}"]`); if(el) el.required = true; });
+                ['businessName', 'address', 'openHour', 'openMinute', 'closeHour', 'closeMinute', 'industry', 'mainService', 'phone'].forEach(name => {
+                    const el = document.querySelector(`[name="${name}"]`); if(el) el.required = true;
+                });
             } else if (mode === 'edit') {
-                const reqNames = ['editBusinessName', 'editAddress', 'editOwner', 'editPhone', 'editEmail'];
-                reqNames.forEach(name => { const el = document.querySelector(`[name="${name}"]`); if(el) el.required = true; });
+                ['editBusinessName', 'editAddress', 'editOwner', 'editPhone', 'editEmail'].forEach(name => {
+                    const el = document.querySelector(`[name="${name}"]`); if(el) el.required = true;
+                });
                 toggleEditType(); 
             } else if (mode === 'landing') {
-                const reqNames = ['landingBusinessName', 'landingOwner', 'landingAddress', 'landingPhone', 'landingEmail', 'landingCatchphrase', 'landingDetails'];
-                reqNames.forEach(name => { const el = document.querySelector(`[name="${name}"]`); if(el) el.required = true; });
+                ['landingBusinessName', 'landingOwner', 'landingAddress', 'landingPhone', 'landingEmail', 'landingCatchphrase', 'landingDetails'].forEach(name => {
+                    const el = document.querySelector(`[name="${name}"]`); if(el) el.required = true;
+                });
             }
         }
 
@@ -336,7 +437,6 @@
                     input.value = ''; 
                     return;
                 }
-
                 previewBox.innerHTML = ''; 
                 previewBox.classList.remove('hidden');
                 placeholder.classList.add('hidden');
@@ -346,7 +446,7 @@
                     reader.onload = function(e) {
                         const img = document.createElement('img');
                         img.src = e.target.result;
-                        img.className = 'w-20 h-20 object-cover rounded-lg shadow-sm';
+                        img.className = 'w-16 h-16 object-cover rounded-lg shadow-sm border border-slate-200';
                         previewBox.appendChild(img);
                     }
                     reader.readAsDataURL(file);
@@ -366,11 +466,7 @@
             return Promise.all(Array.from(files).map(file => {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onload = e => resolve({
-                        data: e.target.result,
-                        name: file.name,
-                        type: file.type
-                    });
+                    reader.onload = e => resolve({ data: e.target.result, name: file.name, type: file.type });
                     reader.onerror = reject;
                     reader.readAsDataURL(file);
                 });
@@ -407,9 +503,7 @@
                         const fileData = await readFiles(fileInput.files);
                         formData.imageData = fileData[0].data; 
                         formData.imageMimeType = fileData[0].type;
-                    } else {
-                        throw new Error('홍보 이미지를 등록해주세요.');
-                    }
+                    } else { throw new Error('홍보 이미지를 등록해주세요.'); }
                     await submitToGAS(formData);
 
                 } else if (mode === 'edit') {
@@ -438,9 +532,7 @@
                     if (fileInput.files.length > 0) {
                         if (fileInput.files.length > 3) throw new Error('사진은 최대 3장까지만 가능합니다.');
                         formData.landingImages = await readFiles(fileInput.files);
-                    } else {
-                        throw new Error('업체 대표 사진을 최소 1장 등록해주세요.');
-                    }
+                    } else { throw new Error('업체 대표 사진을 최소 1장 등록해주세요.'); }
                     await submitToGAS(formData);
                 }
             } catch (err) {
@@ -458,8 +550,7 @@
                 });
                 document.getElementById('loadingOverlay').classList.add('hidden');
                 const successModal = document.getElementById('successModal');
-                const msgText = document.getElementById('successMessageText');
-                msgText.innerText = "접수가 안전하게 처리되었습니다."; 
+                document.getElementById('successMessageText').innerText = "접수가 안전하게 처리되었습니다."; 
                 successModal.classList.remove('hidden');
                 successModal.classList.add('flex');
                 setTimeout(function() { forceCloseWindow(); }, 3000);
@@ -473,5 +564,3 @@
     </script>
 </body>
 </html>
-
-
